@@ -1,0 +1,71 @@
+{
+  "name": "@youvico/api",
+  "version": "0.1.0",
+  "description": "Official library for using the YouViCo Web API",
+  "author": "YouViCo",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18",
+    "npm": ">=8.6.0"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist coverage",
+    "format": "prettier --write .",
+    "lint": "eslint \"{src,test}/**/*.ts\" --fix",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "youvico",
+    "web-api",
+    "client",
+    "http",
+    "api",
+    "sdk",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/youvicohq/sdk-js.git",
+    "directory": "packages/api"
+  },
+  "bugs": {
+    "url": "https://github.com/youvicohq/sdk-js/issues"
+  },
+  "homepage": "https://developers.youvico.com/guides/sdk",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "unicode-emoji-json": "0.8.0"
+  },
+  "devDependencies": {
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.0",
+    "@typescript-eslint/parser": "^8.59.0",
+    "eslint": "^9.39.4",
+    "globals": "^16.5.0",
+    "prettier": "^3.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.59.0",
+    "vitest": "^3.0.0"
+  }
+}
