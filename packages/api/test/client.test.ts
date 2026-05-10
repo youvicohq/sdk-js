@@ -23,6 +23,7 @@ describe("Client", () => {
     it("maps resource methods to documented paths", async () => {
         const { client, fetchMock } = createClient();
 
+        await client.ping();
         await client.projects.search({ query: "launch", sort: { type: "createdAt", direction: "desc" } });
         await client.projects.get("p1");
         await client.folders.list("p1");
@@ -45,6 +46,7 @@ describe("Client", () => {
         await client.reactions.delete("comment1", { type: "👍" });
 
         const calls = (fetchMock.mock.calls as unknown as Array<[string, RequestInit]>).map(([url, init]) => ({ url, method: init.method }));
+        expect(calls).toContainEqual({ url: "https://api.example.test/api/ping", method: "GET" });
         expect(calls).toContainEqual({ url: "https://api.example.test/api/projects/search?query=launch&sort.type=createdAt&sort.direction=desc", method: "GET" });
         expect(calls).toContainEqual({ url: "https://api.example.test/api/projects/p1", method: "GET" });
         expect(calls).toContainEqual({ url: "https://api.example.test/api/projects/p1/folders", method: "GET" });

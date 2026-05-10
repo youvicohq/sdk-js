@@ -18,6 +18,8 @@ export type {
     MultipartUpload,
     OffsetPage,
     OffsetPaginatedResponse,
+    PingResult,
+    PingWorkspace,
     Project,
     Reaction,
     UploadData,

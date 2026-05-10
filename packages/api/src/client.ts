@@ -12,6 +12,7 @@ import {
     uploadYoutubeFile
 } from "./apis/file";
 import { createFolder, deleteFolder, listFolders, updateFolder } from "./apis/folder";
+import { pingApi } from "./apis/ping";
 import { getProject, searchProject, type SearchProjectsRequest } from "./apis/project";
 import { createReaction, deleteReaction, listReactions } from "./apis/reaction";
 import { resolveClientOptions, type ClientOptions } from "./client-options";
@@ -26,6 +27,13 @@ import { normalizeUploadSource } from "./upload/source";
 export class Client {
     private readonly options;
     private readonly transport;
+
+    /**
+     * Check whether the configured API key can reach the API.
+     */
+    public ping = () => {
+        return executeEndpoint(this.transport, pingApi, {});
+    };
 
     /**
      * Project endpoints.

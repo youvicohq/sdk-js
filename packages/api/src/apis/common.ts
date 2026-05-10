@@ -61,6 +61,41 @@ export type CursorPaginatedResponse<T> = { data: T[]; page: CursorPage };
 export type EmptyResponse = void;
 
 /**
+ * Workspace information returned by the API ping endpoint.
+ */
+export type PingWorkspace = {
+    /**
+     * Workspace ID.
+     */
+    id: string;
+
+    /**
+     * Workspace name.
+     */
+    name: string;
+
+    /**
+     * Public workspace avatar URL.
+     */
+    avatarUrl: string | null;
+};
+
+/**
+ * Result returned by the API ping endpoint.
+ */
+export type PingResult = {
+    /**
+     * Whether the API key is valid and reachable.
+     */
+    PONG: true;
+
+    /**
+     * Workspace associated with the API key.
+     */
+    workspace: PingWorkspace;
+};
+
+/**
  * Youvico project.
  */
 export type Project = {
