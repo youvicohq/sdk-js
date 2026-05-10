@@ -1,6 +1,6 @@
 {
   "name": "@youvico/api",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Official library for using the YouViCo Web API",
   "author": "YouViCo",
   "license": "MIT",
