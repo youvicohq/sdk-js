@@ -1,6 +1,6 @@
 {
   "name": "@youvico",
-  "version": "0.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "YouViCo JavaScript SDK workspace",
   "packageManager": "pnpm@10.30.3",
@@ -12,13 +12,18 @@
     "packages/api"
   ],
   "scripts": {
+    "build": "pnpm -r --if-present build",
     "build:api": "pnpm --filter @youvico/api build",
     "clean:api": "pnpm --filter @youvico/api clean",
+    "lint": "pnpm -r --if-present lint",
     "format:api": "pnpm --filter @youvico/api format",
     "lint:api": "pnpm --filter @youvico/api lint",
     "pack:api": "pnpm --filter @youvico/api pack --dry-run",
-    "publish:api": "node scripts/publish-api.mjs",
+    "bump": "node scripts/bump.mjs",
+    "test": "pnpm test:scripts && pnpm -r --if-present test",
+    "test:scripts": "node --test scripts/*.test.mjs",
     "test:api": "pnpm --filter @youvico/api test",
+    "typecheck": "pnpm -r --if-present typecheck",
     "typecheck:api": "pnpm --filter @youvico/api typecheck"
   }
 }

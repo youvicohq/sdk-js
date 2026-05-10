@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   publish:
-    name: Publish package and create release
+    name: Publish packages and create release
     runs-on: ubuntu-latest
     environment: Publish
 
@@ -38,7 +38,7 @@ jobs:
       - name: Resolve version
         id: version
         run: |
-          VERSION="$(node -p "require('./packages/api/package.json').version")"
+          VERSION="$(node -p "require('./package.json').version")"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "tag=v${VERSION}" >> "$GITHUB_OUTPUT"
 
@@ -58,25 +58,33 @@ jobs:
             exit 1
           fi
 
+      - name: Verify workspace versions
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile } from 'node:fs/promises';
+          import { assertWorkspaceVersions } from './scripts/release-utils.mjs';
+
+          const rootPackage = JSON.parse(await readFile('package.json', 'utf8'));
+          await assertWorkspaceVersions(process.cwd(), rootPackage.version);
+          NODE
+
       - name: Typecheck
-        run: pnpm typecheck:api
+        run: pnpm typecheck
 
       - name: Lint
-        run: pnpm lint:api
+        run: pnpm lint
 
       - name: Test
-        run: pnpm test:api
+        run: pnpm test
 
       - name: Build
-        run: pnpm build:api
+        run: pnpm build
 
       - name: Pack dry run
-        run: npm pack --dry-run --ignore-scripts
-        working-directory: packages/api
+        run: node scripts/pack-workspace.mjs
 
-      - name: Publish to npm
-        run: npm publish --access public --ignore-scripts
-        working-directory: packages/api
+      - name: Publish packages to npm
+        run: node scripts/publish-workspace.mjs
 
       - name: Create GitHub release from tag
         if: github.ref_type == 'tag'
