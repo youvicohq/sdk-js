@@ -257,11 +257,6 @@ export type Comment = {
     updatedAt: string;
 
     /**
-     * File associated with the comment.
-     */
-    file?: { id: string };
-
-    /**
      * Comment author.
      */
     author: CommentAuthor | null;
