@@ -92,7 +92,7 @@ if (actualVersion !== tag.slice(1)) {
 
 run('git', ['add', packagePath]);
 run('git', ['commit', '-m', `Release @youvico/api ${tag}`]);
-run('git', ['tag', tag]);
-run('git', ['push', 'origin', branch, '--follow-tags']);
+run('git', ['tag', '-a', tag, '-m', `Release @youvico/api ${tag}`]);
+run('git', ['push', 'origin', branch, tag]);
 
 console.log(`Pushed ${tag}. GitHub Actions will publish @youvico/api ${actualVersion} to npm.`);
