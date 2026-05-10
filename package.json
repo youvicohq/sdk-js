@@ -17,6 +17,7 @@
     "format:api": "pnpm --filter @youvico/api format",
     "lint:api": "pnpm --filter @youvico/api lint",
     "pack:api": "pnpm --filter @youvico/api pack --dry-run",
+    "publish:api": "node scripts/publish-api.mjs",
     "test:api": "pnpm --filter @youvico/api test",
     "typecheck:api": "pnpm --filter @youvico/api typecheck"
   }
