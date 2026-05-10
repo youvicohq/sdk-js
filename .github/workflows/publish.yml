@@ -1,22 +1,26 @@
 name: Publish
 
 on:
-  release:
-    types:
-      - published
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:
-  npm:
-    name: Publish to npm
+  publish:
+    name: Publish package and create release
     runs-on: ubuntu-latest
+    environment: Publish
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Enable Corepack
         run: corepack enable
@@ -31,21 +35,34 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Verify release tag
+      - name: Resolve version
+        id: version
         run: |
-          PACKAGE_VERSION="$(node -p "require('./packages/api/package.json').version")"
-          RELEASE_TAG="${GITHUB_REF_NAME}"
+          VERSION="$(node -p "require('./packages/api/package.json').version")"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${VERSION}" >> "$GITHUB_OUTPUT"
 
-          if [ "${RELEASE_TAG}" != "v${PACKAGE_VERSION}" ]; then
-            echo "Release tag ${RELEASE_TAG} does not match package version v${PACKAGE_VERSION}."
+      - name: Verify tag version
+        if: github.ref_type == 'tag'
+        run: |
+          if [ "${GITHUB_REF_NAME}" != "${{ steps.version.outputs.tag }}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match package version ${{ steps.version.outputs.tag }}."
             exit 1
           fi
 
-      - name: Lint
-        run: pnpm lint:api
+      - name: Verify manual release tag is unused
+        if: github.ref_type != 'tag'
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/${{ steps.version.outputs.tag }}"; then
+            echo "Tag ${{ steps.version.outputs.tag }} already exists."
+            exit 1
+          fi
 
       - name: Typecheck
         run: pnpm typecheck:api
+
+      - name: Lint
+        run: pnpm lint:api
 
       - name: Test
         run: pnpm test:api
@@ -54,8 +71,31 @@ jobs:
         run: pnpm build:api
 
       - name: Pack dry run
-        run: pnpm pack:api
-
-      - name: Publish
-        run: npm publish
+        run: npm pack --dry-run --ignore-scripts
         working-directory: packages/api
+
+      - name: Publish to npm
+        run: npm publish --access public --ignore-scripts
+        working-directory: packages/api
+
+      - name: Create GitHub release from tag
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" \
+            --title "${{ steps.version.outputs.tag }}" \
+            --generate-notes \
+            --latest \
+            --verify-tag
+
+      - name: Create GitHub release
+        if: github.ref_type != 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" \
+            --title "${{ steps.version.outputs.tag }}" \
+            --generate-notes \
+            --latest \
+            --target "${GITHUB_SHA}"
