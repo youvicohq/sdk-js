@@ -2,6 +2,15 @@ name: Publish
 
 on:
   workflow_dispatch:
+    inputs:
+      bump:
+        description: "Release bump"
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
   push:
     tags:
       - "v*"
@@ -10,9 +19,13 @@ permissions:
   contents: write
   id-token: write
 
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
 jobs:
   publish:
-    name: Publish packages and create release
+    name: Version and publish packages
     runs-on: ubuntu-latest
     environment: Publish
 
@@ -35,75 +48,54 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Resolve version
-        id: version
-        run: |
-          VERSION="$(node -p "require('./package.json').version")"
-          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "tag=v${VERSION}" >> "$GITHUB_OUTPUT"
-
-      - name: Verify tag version
-        if: github.ref_type == 'tag'
-        run: |
-          if [ "${GITHUB_REF_NAME}" != "${{ steps.version.outputs.tag }}" ]; then
-            echo "Tag ${GITHUB_REF_NAME} does not match package version ${{ steps.version.outputs.tag }}."
-            exit 1
-          fi
-
-      - name: Verify manual release tag is unused
-        if: github.ref_type != 'tag'
-        run: |
-          if git ls-remote --exit-code --tags origin "refs/tags/${{ steps.version.outputs.tag }}"; then
-            echo "Tag ${{ steps.version.outputs.tag }} already exists."
-            exit 1
-          fi
-
-      - name: Verify workspace versions
-        run: |
-          node --input-type=module <<'NODE'
-          import { readFile } from 'node:fs/promises';
-          import { assertWorkspaceVersions } from './scripts/release-utils.mjs';
-
-          const rootPackage = JSON.parse(await readFile('package.json', 'utf8'));
-          await assertWorkspaceVersions(process.cwd(), rootPackage.version);
-          NODE
-
       - name: Typecheck
         run: pnpm typecheck
 
       - name: Lint
         run: pnpm lint
 
+      - name: Verify lint did not modify files
+        run: git diff --exit-code
+
       - name: Test
         run: pnpm test
+
+      - name: Configure Git author
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+
+      - name: Version with Lerna
+        if: github.event_name == 'workflow_dispatch'
+        run: pnpm exec lerna version "${{ inputs.bump }}"
 
       - name: Build
         run: pnpm build
 
-      - name: Pack dry run
-        run: node scripts/pack-workspace.mjs
+      - name: Resolve release tag
+        id: release
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            TAG="${GITHUB_REF_NAME}"
+          else
+            TAG="$(git describe --tags --abbrev=0 HEAD)"
+          fi
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
-      - name: Publish packages to npm
-        run: node scripts/publish-workspace.mjs
+      - name: Publish with Lerna
+        run: pnpm exec lerna publish from-git
 
-      - name: Create GitHub release from tag
-        if: github.ref_type == 'tag'
+      - name: Push release commit and tag
+        if: github.event_name == 'workflow_dispatch' && github.ref_type == 'branch'
+        run: git push --follow-tags origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${{ steps.version.outputs.tag }}" \
-            --title "${{ steps.version.outputs.tag }}" \
+          gh release create "${{ steps.release.outputs.tag }}" \
+            --title "${{ steps.release.outputs.tag }}" \
             --generate-notes \
             --latest \
             --verify-tag
-
-      - name: Create GitHub release
-        if: github.ref_type != 'tag'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create "${{ steps.version.outputs.tag }}" \
-            --title "${{ steps.version.outputs.tag }}" \
-            --generate-notes \
-            --latest \
-            --target "${GITHUB_SHA}"

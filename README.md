@@ -48,10 +48,10 @@ The SDK supports Node.js 18 and higher.
 
 ```sh
 pnpm install
-pnpm lint:api
-pnpm typecheck:api
-pnpm test:api
-pnpm build:api
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
 ```
 
 ## Getting Help
