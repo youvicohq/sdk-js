@@ -155,7 +155,7 @@ export class Client {
         /**
          * Update file metadata.
          */
-        update: (id: string, params: { name?: string; description?: string | null; allowRestricted?: boolean }) => {
+        update: (id: string, params: { name?: string; description?: string | null; allowRestricted?: boolean; folder?: { id: string } | null }) => {
             return executeEndpoint(this.transport, updateFile, { id, ...params });
         },
 
@@ -188,7 +188,7 @@ export class Client {
         /**
          * Create a comment or reply.
          */
-        create: (fileId: string, params: { content: string; parentId?: string }) => {
+        create: (fileId: string, params: { content: string; anchor?: number; duration?: number; parentId?: string }) => {
             return executeEndpoint(this.transport, createComment, { fileId, ...params });
         },
 

@@ -5,6 +5,7 @@ export type Request = {
     name?: string;
     description?: string | null;
     allowRestricted?: boolean;
+    folder?: { id: string } | null;
 };
 
 export type Response = EmptyResponse;
@@ -12,5 +13,5 @@ export type Response = EmptyResponse;
 export const updateFile: EndpointDefinition<Request, Response> = {
     method: "patch",
     path: request => `/files/${request.id}`,
-    bodyParams: ["name", "description", "allowRestricted"]
+    bodyParams: ["name", "description", "allowRestricted", "folder"]
 };

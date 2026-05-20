@@ -272,9 +272,9 @@ export type Comment = {
     content: string | null;
 
     /**
-     * Anchor metadata for timeline or spatial comments.
+     * Video timestamp in milliseconds, or page number starting from 1 for documents.
      */
-    anchor: Record<string, unknown> | null;
+    anchor: number | null;
 
     /**
      * Comment duration in seconds, when available.
