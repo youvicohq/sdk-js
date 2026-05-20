@@ -277,7 +277,7 @@ export type Comment = {
     anchor: number | null;
 
     /**
-     * Comment duration in seconds, when available.
+     * Duration in the same unit as anchor.
      */
     duration: number | null;
 
