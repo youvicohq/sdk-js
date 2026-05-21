@@ -60,6 +60,26 @@ describe("Client", () => {
         expect(bodies).toContain(JSON.stringify({ content: "Nice", anchor: 12, duration: 3 }));
     });
 
+    it("sends comment replies with parent object", async () => {
+        const { client, fetchMock } = createClient();
+
+        await client.comments.create("file1", { content: "Reply", parent: { id: "comment1" } });
+
+        const body = (fetchMock.mock.calls as unknown as Array<[string, RequestInit]>)[0]?.[1].body;
+
+        expect(body).toBe(JSON.stringify({ content: "Reply", parent: { id: "comment1" } }));
+    });
+
+    it("sends null comment parent when provided", async () => {
+        const { client, fetchMock } = createClient();
+
+        await client.comments.create("file1", { content: "Top-level", parent: null });
+
+        const body = (fetchMock.mock.calls as unknown as Array<[string, RequestInit]>)[0]?.[1].body;
+
+        expect(body).toBe(JSON.stringify({ content: "Top-level", parent: null }));
+    });
+
     it("rejects unsupported reaction emoji before sending a request", async () => {
         const { client, fetchMock } = createClient();
 

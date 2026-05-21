@@ -188,7 +188,19 @@ export class Client {
         /**
          * Create a comment or reply.
          */
-        create: (fileId: string, params: { content: string; anchor?: number; duration?: number; parentId?: string }) => {
+        create: (
+            fileId: string,
+            params: {
+                content: string;
+                anchor?: number;
+                duration?: number;
+                parent?: { id: string } | null;
+                /**
+                 * @deprecated Use parent.id.
+                 */
+                parentId?: string;
+            }
+        ) => {
             return executeEndpoint(this.transport, createComment, { fileId, ...params });
         },
 
