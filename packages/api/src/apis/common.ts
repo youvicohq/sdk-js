@@ -440,7 +440,32 @@ export type CreateSkillParams = {
 /**
  * Parameters for updating a skill.
  */
-export type UpdateSkillParams = Partial<CreateSkillParams> & {
+export type UpdateSkillParams = {
+    /**
+     * Skill name.
+     */
+    name?: string;
+
+    /**
+     * Skill description.
+     */
+    description?: string;
+
+    /**
+     * User-defined string metadata.
+     */
+    metadata?: Record<string, string> | null;
+
+    /**
+     * Tool identifiers allowed for the skill.
+     */
+    allowedTools?: string[] | null;
+
+    /**
+     * Skill license.
+     */
+    license?: string | null;
+
     /**
      * Default version for the skill.
      */

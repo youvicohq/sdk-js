@@ -57,6 +57,11 @@ describe("Client", () => {
             name: "Updated Helper",
             default: { id: "SV1234567890ABCD" }
         });
+        await client.skills.update("SK1234567890ABCD", {
+            metadata: null,
+            allowedTools: null,
+            license: null
+        });
         await client.skills.delete("SK1234567890ABCD");
         await client.skills.publishVersion("SK1234567890ABCD", {
             content: "Review body.",
@@ -96,6 +101,11 @@ describe("Client", () => {
         expect(bodies).toContain(JSON.stringify({
             name: "Updated Helper",
             default: { id: "SV1234567890ABCD" }
+        }));
+        expect(bodies).toContain(JSON.stringify({
+            metadata: null,
+            allowedTools: null,
+            license: null
         }));
         expect(bodies).toContain(JSON.stringify({ content: "Review body.", isDefault: true }));
     });
