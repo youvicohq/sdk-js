@@ -318,6 +318,151 @@ export type Reaction = {
 };
 
 /**
+ * Source that owns a skill.
+ */
+export type SkillSource = "WORKSPACE" | "YOUVICO_MANAGED";
+
+/**
+ * Skill metadata returned in list responses.
+ */
+export type SkillSummary = {
+    /**
+     * Skill ID.
+     */
+    id: string;
+
+    /**
+     * Source that owns the skill.
+     */
+    source: SkillSource;
+
+    /**
+     * Skill name.
+     */
+    name: string;
+
+    /**
+     * Skill description.
+     */
+    description: string;
+};
+
+/**
+ * Version metadata embedded in skill detail responses.
+ */
+export type SkillVersionSummary = {
+    /**
+     * Skill version ID.
+     */
+    id: string;
+
+    /**
+     * Monotonic version number for the skill.
+     */
+    version: number;
+
+    /**
+     * ISO timestamp for when the version was created.
+     */
+    createdAt: string;
+};
+
+/**
+ * Detailed skill response.
+ */
+export type SkillDetail = SkillSummary & {
+    /**
+     * User-defined metadata for the skill.
+     */
+    metadata: Record<string, string> | null;
+
+    /**
+     * Tool identifiers allowed for the skill.
+     */
+    allowedTools: string[] | null;
+
+    /**
+     * Skill license.
+     */
+    license: string | null;
+
+    /**
+     * Default version for the skill.
+     */
+    default: { id: string } | null;
+
+    /**
+     * Published versions for the skill.
+     */
+    versions: SkillVersionSummary[];
+};
+
+/**
+ * Markdown snapshot returned for a skill version.
+ */
+export type SkillVersionMarkdown = {
+    /**
+     * Rendered skill markdown.
+     */
+    markdown: string;
+};
+
+/**
+ * Parameters for creating a skill.
+ */
+export type CreateSkillParams = {
+    /**
+     * Skill name.
+     */
+    name: string;
+
+    /**
+     * Skill description.
+     */
+    description: string;
+
+    /**
+     * User-defined string metadata.
+     */
+    metadata?: Record<string, string>;
+
+    /**
+     * Tool identifiers allowed for the skill.
+     */
+    allowedTools?: string[];
+
+    /**
+     * Skill license.
+     */
+    license?: string;
+};
+
+/**
+ * Parameters for updating a skill.
+ */
+export type UpdateSkillParams = Partial<CreateSkillParams> & {
+    /**
+     * Default version for the skill.
+     */
+    default?: { id: string };
+};
+
+/**
+ * Parameters for publishing a skill version.
+ */
+export type PublishSkillVersionParams = {
+    /**
+     * Markdown content for the version.
+     */
+    content: string;
+
+    /**
+     * Whether the new version should become the default version.
+     */
+    isDefault?: boolean;
+};
+
+/**
  * Multipart upload session.
  */
 export type MultipartUpload = {

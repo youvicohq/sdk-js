@@ -1,6 +1,13 @@
 import { assertReactionEmoji } from "./apis/emoji";
 import { createComment, listComments, listReplies } from "./apis/comment";
-import type { FileTag, UploadFileParams, UploadFileResult } from "./apis/common";
+import type {
+    CreateSkillParams,
+    FileTag,
+    PublishSkillVersionParams,
+    UpdateSkillParams,
+    UploadFileParams,
+    UploadFileResult
+} from "./apis/common";
 import {
     completeUpload,
     deleteFile,
@@ -15,6 +22,8 @@ import { createFolder, deleteFolder, listFolders, updateFolder } from "./apis/fo
 import { pingApi } from "./apis/ping";
 import { getProject, searchProject, type SearchProjectsRequest } from "./apis/project";
 import { createReaction, deleteReaction, listReactions } from "./apis/reaction";
+import { createSkill, deleteSkill, getSkill, listSkills, publishSkillVersion, updateSkill } from "./apis/skill";
+import { deleteSkillVersion, getSkillVersion } from "./apis/skill-version";
 import { resolveClientOptions, type ClientOptions } from "./client-options";
 import { executeEndpoint } from "./execute-endpoint";
 import { createTransport } from "./transport";
@@ -237,6 +246,72 @@ export class Client {
         delete: (commentId: string, params: { type: string }) => {
             assertReactionEmoji(params.type);
             return executeEndpoint(this.transport, deleteReaction, { commentId, type: params.type });
+        }
+    };
+
+    /**
+     * Skill endpoints.
+     */
+    public readonly skills = {
+        /**
+         * List skills available to the configured API key.
+         */
+        list: () => {
+            return executeEndpoint(this.transport, listSkills, {});
+        },
+
+        /**
+         * Create a workspace skill.
+         */
+        create: (params: CreateSkillParams) => {
+            return executeEndpoint(this.transport, createSkill, params);
+        },
+
+        /**
+         * Retrieve a skill by ID.
+         */
+        get: (id: string) => {
+            return executeEndpoint(this.transport, getSkill, { id });
+        },
+
+        /**
+         * Update a workspace skill.
+         */
+        update: (id: string, params: UpdateSkillParams) => {
+            return executeEndpoint(this.transport, updateSkill, { id, ...params });
+        },
+
+        /**
+         * Delete a workspace skill.
+         */
+        delete: (id: string) => {
+            return executeEndpoint(this.transport, deleteSkill, { id });
+        },
+
+        /**
+         * Publish a new skill version.
+         */
+        publishVersion: (id: string, params: PublishSkillVersionParams) => {
+            return executeEndpoint(this.transport, publishSkillVersion, { id, ...params });
+        }
+    };
+
+    /**
+     * Skill version endpoints.
+     */
+    public readonly skillVersions = {
+        /**
+         * Retrieve rendered markdown for a skill version.
+         */
+        get: (id: string) => {
+            return executeEndpoint(this.transport, getSkillVersion, { id });
+        },
+
+        /**
+         * Delete a non-default workspace skill version.
+         */
+        delete: (id: string) => {
+            return executeEndpoint(this.transport, deleteSkillVersion, { id });
         }
     };
 

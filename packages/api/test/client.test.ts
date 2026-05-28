@@ -44,6 +44,26 @@ describe("Client", () => {
         await client.reactions.list("comment1");
         await client.reactions.create("comment1", { type: "👍" });
         await client.reactions.delete("comment1", { type: "👍" });
+        await client.skills.list();
+        await client.skills.create({
+            name: "Review Helper",
+            description: "Summarizes review context.",
+            metadata: { category: "review" },
+            allowedTools: ["browser"],
+            license: "MIT"
+        });
+        await client.skills.get("SK1234567890ABCD");
+        await client.skills.update("SK1234567890ABCD", {
+            name: "Updated Helper",
+            default: { id: "SV1234567890ABCD" }
+        });
+        await client.skills.delete("SK1234567890ABCD");
+        await client.skills.publishVersion("SK1234567890ABCD", {
+            content: "Review body.",
+            isDefault: true
+        });
+        await client.skillVersions.get("SV1234567890ABCD");
+        await client.skillVersions.delete("SV1234567890ABCD");
 
         const calls = (fetchMock.mock.calls as unknown as Array<[string, RequestInit]>).map(([url, init]) => ({ url, method: init.method }));
         const bodies = (fetchMock.mock.calls as unknown as Array<[string, RequestInit]>).map(([, init]) => init.body);
@@ -56,8 +76,28 @@ describe("Client", () => {
         expect(calls).toContainEqual({ url: "https://api.example.test/api/files/file1/upload.complete", method: "POST" });
         expect(calls).toContainEqual({ url: "https://api.example.test/api/files/file1/tag", method: "PATCH" });
         expect(calls).toContainEqual({ url: "https://api.example.test/api/comments/comment1/reactions", method: "DELETE" });
+        expect(calls).toContainEqual({ url: "https://api.example.test/api/skills", method: "GET" });
+        expect(calls).toContainEqual({ url: "https://api.example.test/api/skills", method: "POST" });
+        expect(calls).toContainEqual({ url: "https://api.example.test/api/skills/SK1234567890ABCD", method: "GET" });
+        expect(calls).toContainEqual({ url: "https://api.example.test/api/skills/SK1234567890ABCD", method: "PATCH" });
+        expect(calls).toContainEqual({ url: "https://api.example.test/api/skills/SK1234567890ABCD", method: "DELETE" });
+        expect(calls).toContainEqual({ url: "https://api.example.test/api/skills/SK1234567890ABCD/versions", method: "POST" });
+        expect(calls).toContainEqual({ url: "https://api.example.test/api/skill-versions/SV1234567890ABCD", method: "GET" });
+        expect(calls).toContainEqual({ url: "https://api.example.test/api/skill-versions/SV1234567890ABCD", method: "DELETE" });
         expect(bodies).toContain(JSON.stringify({ description: "Ready", folder: { id: "folder1" } }));
         expect(bodies).toContain(JSON.stringify({ content: "Nice", anchor: 12, duration: 3 }));
+        expect(bodies).toContain(JSON.stringify({
+            name: "Review Helper",
+            description: "Summarizes review context.",
+            metadata: { category: "review" },
+            allowedTools: ["browser"],
+            license: "MIT"
+        }));
+        expect(bodies).toContain(JSON.stringify({
+            name: "Updated Helper",
+            default: { id: "SV1234567890ABCD" }
+        }));
+        expect(bodies).toContain(JSON.stringify({ content: "Review body.", isDefault: true }));
     });
 
     it("sends comment replies with parent object", async () => {
