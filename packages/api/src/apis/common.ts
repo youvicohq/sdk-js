@@ -362,6 +362,11 @@ export type SkillVersionSummary = {
     version: number;
 
     /**
+     * Optional note attached when the version was published.
+     */
+    note: string | null;
+
+    /**
      * ISO timestamp for when the version was created.
      */
     createdAt: string;
@@ -480,6 +485,11 @@ export type PublishSkillVersionParams = {
      * Markdown content for the version.
      */
     content: string;
+
+    /**
+     * Optional note for tracking the published version.
+     */
+    note?: string;
 
     /**
      * Whether the new version should become the default version.

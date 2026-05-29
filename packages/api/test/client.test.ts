@@ -65,6 +65,7 @@ describe("Client", () => {
         await client.skills.delete("SK1234567890ABCD");
         await client.skills.publishVersion("SK1234567890ABCD", {
             content: "Review body.",
+            note: "Initial release.",
             isDefault: true
         });
         await client.skillVersions.get("SV1234567890ABCD");
@@ -107,7 +108,11 @@ describe("Client", () => {
             allowedTools: null,
             license: null
         }));
-        expect(bodies).toContain(JSON.stringify({ content: "Review body.", isDefault: true }));
+        expect(bodies).toContain(JSON.stringify({
+            content: "Review body.",
+            note: "Initial release.",
+            isDefault: true
+        }));
     });
 
     it("sends comment replies with parent object", async () => {

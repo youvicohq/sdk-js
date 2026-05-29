@@ -6,5 +6,5 @@ export type Response = DataResponse<{ id: string; version: number }>;
 export const publishSkillVersion: EndpointDefinition<Request, Response> = {
     method: "post",
     path: request => `/skills/${request.id}/versions`,
-    bodyParams: ["content", "isDefault"]
+    bodyParams: ["content", "note", "isDefault"]
 };
