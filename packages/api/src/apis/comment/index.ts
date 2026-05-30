@@ -1,6 +1,10 @@
 export { createComment } from "./create";
+export { deleteComment } from "./delete";
 export { listComments } from "./list";
 export { listReplies } from "./replies";
+export { updateComment } from "./update";
 export type { Request as CreateCommentRequest, Response as CreateCommentResponse } from "./create";
+export type { Request as DeleteCommentRequest, Response as DeleteCommentResponse } from "./delete";
 export type { Request as ListCommentsRequest, Response as ListCommentsResponse } from "./list";
 export type { Request as ListRepliesRequest, Response as ListRepliesResponse } from "./replies";
+export type { Request as UpdateCommentRequest, Response as UpdateCommentResponse } from "./update";

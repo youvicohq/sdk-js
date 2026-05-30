@@ -1,9 +1,11 @@
 import { assertReactionEmoji } from "./apis/emoji";
-import { createComment, listComments, listReplies } from "./apis/comment";
+import { createComment, deleteComment, listComments, listReplies, updateComment } from "./apis/comment";
 import type {
+    CreateProjectParams,
     CreateSkillParams,
     FileTag,
     PublishSkillVersionParams,
+    UpdateProjectParams,
     UpdateSkillParams,
     UploadFileParams,
     UploadFileResult
@@ -20,7 +22,15 @@ import {
 } from "./apis/file";
 import { createFolder, deleteFolder, listFolders, updateFolder } from "./apis/folder";
 import { pingApi } from "./apis/ping";
-import { getProject, searchProject, type SearchProjectsRequest } from "./apis/project";
+import {
+    cancelProjectDeletion,
+    createProject,
+    getProject,
+    scheduleProjectDeletion,
+    searchProject,
+    type SearchProjectsRequest,
+    updateProject
+} from "./apis/project";
 import { createReaction, deleteReaction, listReactions } from "./apis/reaction";
 import { createSkill, deleteSkill, getSkill, listSkills, publishSkillVersion, updateSkill } from "./apis/skill";
 import { deleteSkillVersion, getSkillVersion } from "./apis/skill-version";
@@ -49,6 +59,13 @@ export class Client {
      */
     public readonly projects = {
         /**
+         * Create a project in the workspace associated with the API key.
+         */
+        create: (params: CreateProjectParams) => {
+            return executeEndpoint(this.transport, createProject, params);
+        },
+
+        /**
          * Search projects accessible with the configured API key.
          */
         search: (params: SearchProjectsRequest) => {
@@ -60,6 +77,27 @@ export class Client {
          */
         get: (id: string) => {
             return executeEndpoint(this.transport, getProject, { id });
+        },
+
+        /**
+         * Update project metadata.
+         */
+        update: (id: string, params: UpdateProjectParams) => {
+            return executeEndpoint(this.transport, updateProject, { id, ...params });
+        },
+
+        /**
+         * Schedule a project for deletion.
+         */
+        scheduleDeletion: (id: string) => {
+            return executeEndpoint(this.transport, scheduleProjectDeletion, { id });
+        },
+
+        /**
+         * Cancel a scheduled project deletion.
+         */
+        cancelDeletion: (id: string) => {
+            return executeEndpoint(this.transport, cancelProjectDeletion, { id });
         }
     };
 
@@ -203,7 +241,7 @@ export class Client {
                 content: string;
                 anchor?: number;
                 duration?: number;
-                parent?: { id: string } | null;
+                parent?: { id: string };
                 /**
                  * @deprecated Use parent.id.
                  */
@@ -211,6 +249,20 @@ export class Client {
             }
         ) => {
             return executeEndpoint(this.transport, createComment, { fileId, ...params });
+        },
+
+        /**
+         * Update a comment owned by the API key actor.
+         */
+        update: (id: string, params: { content: string }) => {
+            return executeEndpoint(this.transport, updateComment, { id, ...params });
+        },
+
+        /**
+         * Delete a comment owned by the API key actor.
+         */
+        delete: (id: string) => {
+            return executeEndpoint(this.transport, deleteComment, { id });
         },
 
         /**

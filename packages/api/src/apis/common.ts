@@ -128,6 +128,83 @@ export type Project = {
      * ISO timestamp for when the project was last updated.
      */
     updatedAt: string;
+
+    /**
+     * ISO timestamp for when the project is scheduled for deletion.
+     */
+    destroyedAt?: string | null;
+};
+
+/**
+ * Project access policy.
+ */
+export type ProjectAccessRange = "ONLY_PROJECT_MEMBER" | "ALLOW_WORKSPACE_MEMBER";
+
+/**
+ * Project member role accepted by public project creation.
+ */
+export type ProjectRole =
+    | "PROJECT_MANAGER" |
+    "PROJECT_MEMBER" |
+    "PROJECT_REVIEWER" |
+    "PROJECT_RESTRICTED_REVIEWER";
+
+/**
+ * Parameters for creating a project.
+ */
+export type CreateProjectParams = {
+    /**
+     * Project name.
+     */
+    name: string;
+
+    /**
+     * Deadline date in YYYY-MM-DD format.
+     */
+    deadline: string;
+
+    /**
+     * Project description.
+     */
+    description?: string;
+
+    /**
+     * Members to add to the project.
+     */
+    members: Array<{
+        user: { id: string };
+        role: ProjectRole;
+    }>;
+
+    /**
+     * Project access policy.
+     */
+    accessRange: ProjectAccessRange;
+};
+
+/**
+ * Parameters for updating a project.
+ */
+export type UpdateProjectParams = {
+    /**
+     * Project name.
+     */
+    name?: string;
+
+    /**
+     * Project description. Pass null to clear it.
+     */
+    description?: string | null;
+
+    /**
+     * Deadline date in YYYY-MM-DD format.
+     */
+    deadline?: string;
+
+    /**
+     * Project access policy.
+     */
+    accessRange?: ProjectAccessRange;
 };
 
 /**

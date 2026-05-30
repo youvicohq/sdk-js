@@ -24,8 +24,26 @@ describe("Client", () => {
         const { client, fetchMock } = createClient();
 
         await client.ping();
+        await client.projects.create({
+            name: "Launch Review",
+            deadline: "2026-12-31",
+            description: "Public API project",
+            members: [{
+                user: { id: "00000000-0000-0000-0000-000000000001" },
+                role: "PROJECT_REVIEWER"
+            }],
+            accessRange: "ALLOW_WORKSPACE_MEMBER"
+        });
         await client.projects.search({ query: "launch", sort: { type: "createdAt", direction: "desc" } });
         await client.projects.get("p1");
+        await client.projects.update("p1", {
+            name: "Updated Launch Review",
+            description: null,
+            deadline: "2026-12-25",
+            accessRange: "ONLY_PROJECT_MEMBER"
+        });
+        await client.projects.scheduleDeletion("p1");
+        await client.projects.cancelDeletion("p1");
         await client.folders.list("p1");
         await client.folders.create("p1", { name: "Renders" });
         await client.folders.update("f1", { name: "Finals" });
@@ -40,6 +58,8 @@ describe("Client", () => {
         await client.files.delete("file1");
         await client.comments.list("file1");
         await client.comments.create("file1", { content: "Nice", anchor: 12, duration: 3 });
+        await client.comments.update("comment1", { content: "Updated" });
+        await client.comments.delete("comment1");
         await client.comments.replies("comment1");
         await client.reactions.list("comment1");
         await client.reactions.create("comment1", { type: "👍" });
@@ -74,13 +94,19 @@ describe("Client", () => {
         const calls = (fetchMock.mock.calls as unknown as Array<[string, RequestInit]>).map(([url, init]) => ({ url, method: init.method }));
         const bodies = (fetchMock.mock.calls as unknown as Array<[string, RequestInit]>).map(([, init]) => init.body);
         expect(calls).toContainEqual({ url: "https://api.example.test/api/ping", method: "GET" });
+        expect(calls).toContainEqual({ url: "https://api.example.test/api/projects", method: "POST" });
         expect(calls).toContainEqual({ url: "https://api.example.test/api/projects/search?query=launch&sort.type=createdAt&sort.direction=desc", method: "GET" });
         expect(calls).toContainEqual({ url: "https://api.example.test/api/projects/p1", method: "GET" });
+        expect(calls).toContainEqual({ url: "https://api.example.test/api/projects/p1", method: "PATCH" });
+        expect(calls).toContainEqual({ url: "https://api.example.test/api/projects/p1/delete", method: "POST" });
+        expect(calls).toContainEqual({ url: "https://api.example.test/api/projects/p1/delete.cancel", method: "POST" });
         expect(calls).toContainEqual({ url: "https://api.example.test/api/projects/p1/folders", method: "GET" });
         expect(calls).toContainEqual({ url: "https://api.example.test/api/folders/f1", method: "PATCH" });
         expect(calls).toContainEqual({ url: "https://api.example.test/api/projects/p1/files", method: "GET" });
         expect(calls).toContainEqual({ url: "https://api.example.test/api/files/file1/upload.complete", method: "POST" });
         expect(calls).toContainEqual({ url: "https://api.example.test/api/files/file1/tag", method: "PATCH" });
+        expect(calls).toContainEqual({ url: "https://api.example.test/api/comments/comment1", method: "PATCH" });
+        expect(calls).toContainEqual({ url: "https://api.example.test/api/comments/comment1", method: "DELETE" });
         expect(calls).toContainEqual({ url: "https://api.example.test/api/comments/comment1/reactions", method: "DELETE" });
         expect(calls).toContainEqual({ url: "https://api.example.test/api/skills", method: "GET" });
         expect(calls).toContainEqual({ url: "https://api.example.test/api/skills", method: "POST" });
@@ -90,8 +116,25 @@ describe("Client", () => {
         expect(calls).toContainEqual({ url: "https://api.example.test/api/skills/SK1234567890ABCD/versions", method: "POST" });
         expect(calls).toContainEqual({ url: "https://api.example.test/api/skill-versions/SV1234567890ABCD", method: "GET" });
         expect(calls).toContainEqual({ url: "https://api.example.test/api/skill-versions/SV1234567890ABCD", method: "DELETE" });
+        expect(bodies).toContain(JSON.stringify({
+            name: "Launch Review",
+            deadline: "2026-12-31",
+            description: "Public API project",
+            members: [{
+                user: { id: "00000000-0000-0000-0000-000000000001" },
+                role: "PROJECT_REVIEWER"
+            }],
+            accessRange: "ALLOW_WORKSPACE_MEMBER"
+        }));
+        expect(bodies).toContain(JSON.stringify({
+            name: "Updated Launch Review",
+            description: null,
+            deadline: "2026-12-25",
+            accessRange: "ONLY_PROJECT_MEMBER"
+        }));
         expect(bodies).toContain(JSON.stringify({ description: "Ready", folder: { id: "folder1" } }));
         expect(bodies).toContain(JSON.stringify({ content: "Nice", anchor: 12, duration: 3 }));
+        expect(bodies).toContain(JSON.stringify({ content: "Updated" }));
         expect(bodies).toContain(JSON.stringify({
             name: "Review Helper",
             description: "Summarizes review context.",
@@ -123,16 +166,6 @@ describe("Client", () => {
         const body = (fetchMock.mock.calls as unknown as Array<[string, RequestInit]>)[0]?.[1].body;
 
         expect(body).toBe(JSON.stringify({ content: "Reply", parent: { id: "comment1" } }));
-    });
-
-    it("sends null comment parent when provided", async () => {
-        const { client, fetchMock } = createClient();
-
-        await client.comments.create("file1", { content: "Top-level", parent: null });
-
-        const body = (fetchMock.mock.calls as unknown as Array<[string, RequestInit]>)[0]?.[1].body;
-
-        expect(body).toBe(JSON.stringify({ content: "Top-level", parent: null }));
     });
 
     it("rejects unsupported reaction emoji before sending a request", async () => {

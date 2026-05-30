@@ -5,7 +5,7 @@ export type Request = {
     content: string;
     anchor?: number;
     duration?: number;
-    parent?: { id: string } | null;
+    parent?: { id: string };
     /**
      * @deprecated Use parent.id.
      */
