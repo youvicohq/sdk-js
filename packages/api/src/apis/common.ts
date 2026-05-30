@@ -171,7 +171,7 @@ export type CreateProjectParams = {
     /**
      * Members to add to the project.
      */
-    members: Array<{
+    members?: Array<{
         user: { id: string };
         role: ProjectRole;
     }>;

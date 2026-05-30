@@ -168,6 +168,24 @@ describe("Client", () => {
         expect(body).toBe(JSON.stringify({ content: "Reply", parent: { id: "comment1" } }));
     });
 
+    it("allows project creation without members", async () => {
+        const { client, fetchMock } = createClient();
+
+        await client.projects.create({
+            name: "No Member Project",
+            deadline: "2026-12-31",
+            accessRange: "ONLY_PROJECT_MEMBER"
+        });
+
+        const body = (fetchMock.mock.calls as unknown as Array<[string, RequestInit]>)[0]?.[1].body;
+
+        expect(body).toBe(JSON.stringify({
+            name: "No Member Project",
+            deadline: "2026-12-31",
+            accessRange: "ONLY_PROJECT_MEMBER"
+        }));
+    });
+
     it("rejects unsupported reaction emoji before sending a request", async () => {
         const { client, fetchMock } = createClient();
 
